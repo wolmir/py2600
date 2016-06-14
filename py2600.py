@@ -1,11 +1,14 @@
 import sys
+import pygame
+
+from pygame.locals import *
 
 # Organisation
 
 MEM_SIZE = 4096
 STACK_SIZE = 256
 
-# Architecture
+# ISA
 LOAD  = 0x01
 STORE = 0x02
 INC   = 0x03
@@ -123,10 +126,26 @@ def run():
         print ''
 
 
+# ///////////////////////////// Graphics Display Config /////////////////////////
+WIDTH  = 800
+HEIGHT = 800
+
+TIA_WIDTH  = 160
+TIA_HEIGHT = 192
+
+pygame.init()
+
+# ///////////////////////////// Graphics Display Config /////////////////////////
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print "Usage: py2600 rom_file"
         sys.exit()
+
+    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption('Py2600')
+
+    tia = pygame.Surface((TIA_WIDTH, TIA_HEIGHT)).convert()
 
     with open(sys.argv[1], 'rb') as rom_file:
         program = bytearray(rom_file.read(MEM_SIZE))
