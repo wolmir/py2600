@@ -1,3 +1,4 @@
 # Py2600
 
-A pygame library to make Atari 2600 look-alike games
+A virtual machine for making games similar
+to the first generation.
