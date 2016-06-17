@@ -23,6 +23,7 @@ CP = 0x0B
 CPIP = 0x0C
 CPINC = 0x0D
 INT = 0x0E
+PUSHA = 0x0F
 
 memory = bytearray(MEM_SIZE)
 stack  = bytearray()
@@ -49,6 +50,10 @@ def run():
                 print 'push: ' + str(memory[ip + 1])
             stack.append(memory[ip + 1])
             ip += 1
+        elif op == PUSHA:
+            stack.append(memory[ip + 1])
+            stack.append(memory[ip + 2])
+            ip += 2
         elif op == LOAD:
             addr = (stack.pop() << n) | stack.pop()
             stack.append(memory[addr])

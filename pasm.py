@@ -34,11 +34,47 @@ class LabelDefState(State):
 			self.fsm.change_state(LabelState(self.label_name, self.fsm))
 
 
+class PushState(State):
+	def __init__(self, fsm):
+		State.__init__(self, fsm)
+
+	def update(self, symbol):
+		self.fsm.machine_code.append(py2600.PUSH)
+		self.fsm.machine_code.append(int(symbol, 16))
+		self.fsm.change_state(InitialState(self.fsm))
+
+
+class CommentState(State):
+	def __init__(self, fsm):
+		State.__init__(self, fsm)
+
+	def update(self, symbol):
+		if (symbol == '\n'):
+			self.fsm.change_state(InitialState(self.fsm))
+
+
+class PushaState(State):
+	def __init__(self, fsm):
+		State.__init__(self, fsm)
+
+	def update(self, symbol):
+		self.fsm.machine_code.append(py2600.PUSHA)
+		try:
+			self.fsm.machine_code.append(int(symbol, 16))
+		except ValueError:
+			addr = self.resolve_address(symbol)
+			self.fsm.machine_code.append((addr & 0x00FF))
+			self.fsm.machine_code.append((addr >> 8) & 0x00FF)
+		self.fsm.change_state(InitialState(self.fsm))
+
+
 class InitialState(State):
 	def __init__(self, fsm):
 		State.__init__(self, fsm)
 		self.state_table['label'] = LabelDefState
 		self.state_table['PUSH'] = PushState
+		self.state_table['PUSHA'] = PushaState
+		self.state_table[';'] = CommentState
 
 	def update(self, symbol):
 		next_state = None
