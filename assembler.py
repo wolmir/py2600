@@ -42,6 +42,9 @@ while ip < len(program):
             data_segs = True
             print 'end of program'
 
+        elif segs[0] == 'label':
+            labels.append(segs[1])
+
     else:
         bytecode.append(int(program[ip], 16))
         print int(program[ip], 16)
