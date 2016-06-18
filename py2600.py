@@ -6,7 +6,7 @@ from pygame.locals import *
 
 # Organisation
 
-MEM_SIZE = 4096
+MEM_SIZE = 8192
 STACK_SIZE = 256
 
 # ISA
@@ -28,12 +28,12 @@ INT = 0x0E
 memory = bytearray(MEM_SIZE)
 stack  = bytearray()
 
-def tty_print():
-    txt = map(lambda x: chr(x), memory[3840:])
-    print ''.join(txt)
+# def tty_print():
+#     txt = map(lambda x: chr(x), memory[3840:])
+#     print ''.join(txt)
 
 it = []
-it.append((0x80, tty_print))
+# it.append((0x80, tty_print))
 
 debug_msg = False
 
@@ -136,17 +136,25 @@ TIA_HEIGHT = 192
 
 pygame.init()
 
-# ///////////////////////////// Graphics Display Config /////////////////////////
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Py2600')
+
+tia = pygame.Surface((TIA_WIDTH, TIA_HEIGHT)).convert()
+tia_buffer = pygame.PixelArray(tia)
+
+def gfx_blit():
+    for i in range(TIA_HEIGHT):
+        tia_buffer[i][:] = map(lambda x: pal[x], memory[GFX_ADDR:])
+    screen.blit(tia, (0,0))
+
+it.append((0x42, gfx_blit))
+
+# ///////////////////////////// End of Graphics Display Config /////////////////////////
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print "Usage: py2600 rom_file"
         sys.exit()
-
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    pygame.display.set_caption('Py2600')
-
-    tia = pygame.Surface((TIA_WIDTH, TIA_HEIGHT)).convert()
 
     with open(sys.argv[1], 'rb') as rom_file:
         program = bytearray(rom_file.read(MEM_SIZE))
