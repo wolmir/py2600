@@ -12,7 +12,7 @@ patterns:
 
 - comment: Stack ops
   name: keyword.other.stack.pasm
-  match: PUSH
+  match: PUSHA|PUSH
 
 - comment: Interrupts
   name: keyword.other.interrupt.pasm

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>fileTypes</key>
+	<array>
+		<string>pasm</string>
+	</array>
+	<key>name</key>
+	<string>Py2600 Assembly</string>
+	<key>patterns</key>
+	<array>
+		<dict>
+			<key>comment</key>
+			<string>Data transfer ops</string>
+			<key>match</key>
+			<string>CPINC|CP</string>
+			<key>name</key>
+			<string>keyword.other.data_transfer_opcode.pasm</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Stack ops</string>
+			<key>match</key>
+			<string>PUSHA|PUSH</string>
+			<key>name</key>
+			<string>keyword.other.stack.pasm</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Interrupts</string>
+			<key>match</key>
+			<string>INT</string>
+			<key>name</key>
+			<string>keyword.other.interrupt.pasm</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Hex codes</string>
+			<key>match</key>
+			<string>0x[\dA-F]+</string>
+			<key>name</key>
+			<string>constant.numeric.pasm</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Program end</string>
+			<key>match</key>
+			<string>END</string>
+			<key>name</key>
+			<string>keyword.other.end.pasm</string>
+		</dict>
+	</array>
+	<key>scopeName</key>
+	<string>source.pasm</string>
+	<key>uuid</key>
+	<string>749717f7-36e0-4bff-b5ed-853fdc4cb7f1</string>
+</dict>
+</plist>

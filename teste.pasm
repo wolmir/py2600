@@ -1,4 +1,4 @@
-label print_data:
+label print_data
 0x43
 0x72
 0x69

@@ -102,6 +102,19 @@
 				<key>fontStyle</key>
 				<string></string>
 				<key>foreground</key>
+				<string>#5A525F</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>Keyword</string>
+			<key>scope</key>
+			<string>keyword.other.interrupt.pasm</string>
+			<key>settings</key>
+			<dict>
+				<key>fontStyle</key>
+				<string></string>
+				<key>foreground</key>
 				<string>#234A97</string>
 			</dict>
 		</dict>
