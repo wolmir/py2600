@@ -17,8 +17,8 @@ label print_data
 0x6F
 0x21
 
-PUSH 0x00          ;tty_buffer_addr 0x0F[00]
-PUSH 0x0F          ;tty_buffer_addr 0x[0F]00
+PUSH 0x00          ; Endereço do buffer de terminal, 0x0F[00]
+PUSH 0x0F          ; Endereço do buffer de terminal, 0x[0F]00
 PUSHA (print_data)
 CPINC
 CPINC

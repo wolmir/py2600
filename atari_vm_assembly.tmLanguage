@@ -44,6 +44,46 @@
 		</dict>
 		<dict>
 			<key>comment</key>
+			<string>Label def</string>
+			<key>match</key>
+			<string>label|LABEL</string>
+			<key>name</key>
+			<string>keyword.other.label.pasm</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Label name</string>
+			<key>match</key>
+			<string>(?&lt;=label)\s.+$</string>
+			<key>name</key>
+			<string>variable.language.pasm</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Address</string>
+			<key>match</key>
+			<string>(?&lt;=\().+(?=\))</string>
+			<key>name</key>
+			<string>entity.name.tag.pasm</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Insert here</string>
+			<key>match</key>
+			<string>(?&lt;=\[).+(?=\])</string>
+			<key>name</key>
+			<string>storage.type.pasm</string>
+		</dict>
+		<dict>
+			<key>comment</key>
+			<string>Comment</string>
+			<key>match</key>
+			<string>;.*$</string>
+			<key>name</key>
+			<string>comment.line.double-slash.pasm</string>
+		</dict>
+		<dict>
+			<key>comment</key>
 			<string>Program end</string>
 			<key>match</key>
 			<string>END</string>
