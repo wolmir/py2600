@@ -148,6 +148,8 @@ HEIGHT = 800
 TIA_WIDTH  = 160
 TIA_HEIGHT = 192
 
+GFX_ADDR = 0x1DFF
+
 pygame.init()
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
