@@ -151,6 +151,10 @@ class InitialState(State):
             self.fsm.machine_code.append(py2600.CPINC)
         elif symbol == 'CP':
             self.fsm.machine_code.append(py2600.CP)
+        elif symbol == 'CPV':
+            self.fsm.machine_code.append(py2600.CPV)
+        elif symbol == 'CPINCV':
+            self.fsm.machine_code.append(py2600.CPINCV)
         elif symbol == 'END':
             self.fsm.machine_code.append(py2600.END)
         elif symbol.startswith('['):
@@ -206,6 +210,7 @@ class PasmFSM:
     def run(self):
         for symbol in self.tape:
             self.currentState.update(symbol)
+        self.machine_code.append(py2600.END)
 
     @staticmethod
     def sanitize(source_code):
