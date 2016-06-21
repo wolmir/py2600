@@ -136,6 +136,7 @@ def run():
         for e in stack:
             print e
         print ''
+        raw_input()
 
 
 # ///////////////////////////// Graphics Display Config /////////////////////////
