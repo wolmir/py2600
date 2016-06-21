@@ -129,7 +129,8 @@ def run():
             for ih in it:
                 if ih[0] == ic:
                     cb = ih[1]
-            cb()
+            if cb:
+                cb()
             ip += 1
         ip += 1
 
