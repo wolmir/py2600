@@ -1,0 +1,48 @@
+# [PackageDev] target_format: plist, ext: tmLanguage
+---
+name: Py2600 Assembly
+scopeName: source.pasm
+fileTypes: [pasm]
+uuid: 749717f7-36e0-4bff-b5ed-853fdc4cb7f1
+
+patterns:
+- comment: Data transfer ops
+  name: keyword.other.data_transfer_opcode.pasm
+  match: CPINC|CP
+
+- comment: Stack ops
+  name: keyword.other.stack.pasm
+  match: PUSHA|PUSH
+
+- comment: Interrupts
+  name: keyword.other.interrupt.pasm
+  match: INT
+
+- comment: Hex codes
+  name: constant.numeric.pasm
+  match: 0x[\dA-F]+
+
+- comment: Label def
+  name: keyword.other.label.pasm
+  match: label|LABEL
+
+- comment: Label name
+  name: variable.language.pasm
+  match: (?<=label)\s.+$
+
+- comment: Address
+  name: entity.name.tag.pasm
+  match: (?<=\().+(?=\))
+
+- comment: Insert here
+  name: storage.type.pasm
+  match: (?<=\[).+(?=\])
+
+- comment: Comment
+  name: comment.line.double-slash.pasm
+  match: ;.*$
+
+- comment: Program end
+  name: keyword.other.end.pasm
+  match: END
+...

@@ -10,20 +10,23 @@ MEM_SIZE = 8192
 STACK_SIZE = 256
 
 # ISA
-LOAD  = 0x01
-STORE = 0x02
-INC   = 0x03
-DEC   = 0x04
-ADD   = 0x05
-SUB   = 0x06
-MUL   = 0X07
-DIV   = 0X08
-PUSH  = 0x09
+LOAD    = 0x01
+STORE   = 0x02
+INC     = 0x03
+DEC     = 0x04
+ADD     = 0x05
+SUB     = 0x06
+MUL     = 0X07
+DIV     = 0X08
+PUSH    = 0x09
 IFCMPEQ = 0x0A
-CP = 0x0B
-CPIP = 0x0C
-CPINC = 0x0D
-INT = 0x0E
+CP      = 0x0B
+CPIP    = 0x0C
+CPINC   = 0x0D
+INT     = 0x0E
+PUSHA   = 0x0F
+BRK     = 0x10
+END     = 0xFF
 
 memory = bytearray(MEM_SIZE)
 stack  = bytearray()
@@ -39,7 +42,7 @@ debug_msg = False
 
 def run():
     ip = 0
-    while memory[ip] != 0xFF:
+    while memory[ip] != END:
         if debug_msg:
             for e in stack:
                 print e
@@ -50,6 +53,12 @@ def run():
                 print 'push: ' + str(memory[ip + 1])
             stack.append(memory[ip + 1])
             ip += 1
+        elif op == PUSHA:
+            if debug_msg:
+                print 'push_addr: ' + str(memory[ip + 1]) + ' ' + str(memory[ip + 2])
+            stack.append(memory[ip + 1])
+            stack.append(memory[ip + 2])
+            ip += 2
         elif op == LOAD:
             addr = (stack.pop() << n) | stack.pop()
             stack.append(memory[addr])
@@ -102,6 +111,9 @@ def run():
         elif op == CPINC:
             src  = (stack.pop() << 8) | stack.pop()
             dest = (stack.pop() << 8) | stack.pop()
+            if debug_msg:
+                print 'copy_inc: ' + str(src) + ' -> ' + str(dest)
+                print 'copy_inc: ' + str(memory[src]) + ' -> ' + str(memory[dest])
             memory[dest] = memory[src]
             src  += 1
             dest += 1
@@ -125,6 +137,7 @@ def run():
         for e in stack:
             print e
         print ''
+        raw_input()
 
 
 # ///////////////////////////// Graphics Display Config /////////////////////////
@@ -160,3 +173,4 @@ if __name__ == '__main__':
         program = bytearray(rom_file.read(MEM_SIZE))
         memory[0:len(program)] = program
         run()
+
