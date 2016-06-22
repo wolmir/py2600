@@ -21,6 +21,7 @@ MUL     = 0X07
 DIV     = 0X08
 PUSH    = 0x09
 IFCMPEQ = 0x0A
+IFCMPLT = 0x14
 CP      = 0x0B
 CPIP    = 0x0C
 CPINC   = 0x0D
@@ -244,10 +245,7 @@ def run():
             addr = (stack.pop() << 8) | stack.pop()
             memory[addr] = stack.pop()
         elif op == INC:
-            opr = stack.pop()
-            opr += 1
-            opr = min(255, opr)
-            stack.append(opr)
+            stack[-1] = min(0xFF, stack[-1] + 1)
         elif op == DEC:
             opr = stack.pop()
             opr -= 1
@@ -269,11 +267,17 @@ def run():
             d1 = stack.pop()
             d2 = stack.pop()
             stack.append(m1 / m2)
+
         elif op == IFCMPEQ:
             if stack.pop() == stack.pop():
-                ip += memory[ip + 1]
+                ip = ((memory[ip + 1] << 8) | memory[ip + 2])
             else:
-                ip += 1
+                ip += 2
+        elif op == IFCMPLT:
+            if stack.pop() < stack.pop():
+                ip = ((memory[ip + 1] << 8) | memory[ip + 2])
+            else:
+                ip += 2
 
         elif op == CP:
             src = (stack.pop() << 8) | stack.pop()

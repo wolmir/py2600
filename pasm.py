@@ -98,7 +98,8 @@ class PushaState(State):
         self.fsm.machine_code.append(py2600.PUSHA)
         try:
             value = int(symbol, 16)
-            self.fsm.machine_code.append(value)
+            self.fsm.machine_code.append(value & 0x00FF)
+            self.fsm.machine_code.append((value & 0xFF00) >> 8)
         except ValueError:
             addr = self.fsm.mark_for_resolution(symbol[1:-1])
             self.fsm.machine_code.append(0)
@@ -133,6 +134,23 @@ class DataState(State):
         else:
             self.fsm.change_state(InitialState(self.fsm))
 
+class BranchState(State):
+    def __init__(self, branch_type, fsm):
+        State.__init__(self, fsm)
+        if branch_type == 'lt':
+            self.fsm.machine_code.append(py2600.IFCMPLT)
+
+    def update(self, symbol):
+        try:
+            value = int(symbol, 16)
+            self.fsm.machine_code.append(value & 0x00FF)
+            self.fsm.machine_code.append((value & 0xFF00) >> 8)
+        except ValueError:
+            addr = self.fsm.mark_for_resolution(symbol[1:-1])
+            self.fsm.machine_code.append(0)
+            self.fsm.machine_code.append(0)
+        self.fsm.change_state(InitialState(self.fsm))
+
 
 class InitialState(State):
     def __init__(self, fsm):
@@ -157,6 +175,12 @@ class InitialState(State):
             self.fsm.machine_code.append(py2600.CPINCV)
         elif symbol == 'END':
             self.fsm.machine_code.append(py2600.END)
+        elif symbol == 'STORE':
+            self.fsm.machine_code.append(py2600.STORE)
+        elif symbol == 'LOAD':
+            self.fsm.machine_code.append(py2600.LOAD)
+        elif symbol == 'IFCMPLT':
+            self.fsm.change_state(BranchState('lt', self.fsm))
         elif symbol.startswith('['):
             self.fsm.resolve(symbol[1:-1])
         elif symbol.startswith(';'):
