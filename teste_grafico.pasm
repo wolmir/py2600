@@ -30,7 +30,6 @@ label graphics_data
 PUSH 0x2A
 PUSH 0x2A
 PUSHA (graphics_data)
-
 PUSH 0x00              ;initialise the index
 PUSHA 0x1FFE           ;store the index here
 STORE                  ;effectively store the index
@@ -38,13 +37,9 @@ STORE                  ;effectively store the index
 label line_loop
 CPINCV
 PUSHA 0x1FFE
-LOAD
-INC
-PUSHA 0x1FFE
-STORE
+INCM
 
 [line_loop]
-PUSHA 0x1FFE
 LOAD
 PUSH 0x1B
 IFCMPLT (line_loop)

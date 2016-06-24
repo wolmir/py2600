@@ -179,13 +179,15 @@ class InitialState(State):
             self.fsm.machine_code.append(py2600.STORE)
         elif symbol == 'LOAD':
             self.fsm.machine_code.append(py2600.LOAD)
+        elif symbol == 'INCM':
+            self.fsm.machine_code.append(py2600.INCM)
         elif symbol == 'IFCMPLT':
             self.fsm.change_state(BranchState('lt', self.fsm))
         elif symbol.startswith('['):
             self.fsm.resolve(symbol[1:-1])
         elif symbol.startswith(';'):
             self.fsm.change_state(CommentState(self.fsm))
-        elif (symbol != '') and (symbol != '\n'):
+        elif not symbol in ['', '\n', END_OF_BLOCK]:
             self.fsm.change_state(DataState(symbol, self.fsm))
 
 

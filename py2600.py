@@ -14,6 +14,7 @@ STACK_SIZE = 256
 LOAD    = 0x01
 STORE   = 0x02
 INC     = 0x03
+INCM    = 0x15
 DEC     = 0x04
 ADD     = 0x05
 SUB     = 0x06
@@ -246,6 +247,9 @@ def run():
             memory[addr] = stack.pop()
         elif op == INC:
             stack[-1] = min(0xFF, stack[-1] + 1)
+        elif op == INCM:
+            addr = (stack[-1] << 8) | stack[-2]
+            memory[addr] = min(0xFF, memory[addr])
         elif op == DEC:
             opr = stack.pop()
             opr -= 1
