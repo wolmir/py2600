@@ -102,8 +102,6 @@ class PushaState(State):
             self.fsm.machine_code.append((value & 0xFF00) >> 8)
         except ValueError:
             addr = self.fsm.mark_for_resolution(symbol[1:-1])
-            self.fsm.machine_code.append(0)
-            self.fsm.machine_code.append(0)
         self.fsm.change_state(InitialState(self.fsm))
 
 
@@ -147,8 +145,6 @@ class BranchState(State):
             self.fsm.machine_code.append((value & 0xFF00) >> 8)
         except ValueError:
             addr = self.fsm.mark_for_resolution(symbol[1:-1])
-            self.fsm.machine_code.append(0)
-            self.fsm.machine_code.append(0)
         self.fsm.change_state(InitialState(self.fsm))
 
 
@@ -209,6 +205,7 @@ class PasmFSM:
         self.labeled = {}
         self.machine_code = bytearray()
         self.marked_symbols = SymbolTable()
+        self.resolved_symbols = {}
         self.tape = Tape(PasmFSM.sanitize(src))
 
     def change_state(self, state):
@@ -220,18 +217,29 @@ class PasmFSM:
 
     def mark_for_resolution(self, symbol):
         print 'Marking for resolution: ' + symbol
-        self.marked_symbols.mark((symbol, len(self.machine_code)))
+        if not self.resolve_for_position(symbol):
+            self.marked_symbols.mark((symbol, len(self.machine_code) - 2))
 
     def resolve(self, ref_name):
         print "Resolving references to: " + ref_name
         ref_values = self.labeled[ref_name]
         self.tape.insert(ref_values)
+        symbol_addr = len(self.machine_code)
+        self.resolved_symbols[ref_name] = (symbol_addr & 0x00FF, (symbol_addr & 0xFF00) >> 8)
         for addr in self.marked_symbols.get_refs_to(ref_name):
             print '\tAt addr: ' + str(addr)
-            symbol_addr = len(self.machine_code)
             print '\t\tresolved to: ' + str(symbol_addr & 0x00FF) + ' ' + str((symbol_addr & 0xFF00) >> 8) + ' or ' + str(symbol_addr)
             self.machine_code[addr] = symbol_addr & 0x00FF
             self.machine_code[addr + 1] = (symbol_addr & 0xFF00) >> 8
+
+    def resolve_for_position(self, symbol):
+        if symbol in self.resolved_symbols.keys():
+            self.machine_code.append(self.resolved_symbols[symbol][0])
+            self.machine_code.append(self.resolved_symbols[symbol][1])
+            return True
+        self.machine_code.append(0x00)
+        self.machine_code.append(0x00)
+        return False
 
     def run(self):
         for symbol in self.tape:
