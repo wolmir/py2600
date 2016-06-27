@@ -11,6 +11,7 @@ MEM_SIZE = 8192
 STACK_SIZE = 256
 
 # ISA
+NOP     = 0x00
 LOAD    = 0x01
 STORE   = 0x02
 INC     = 0x03
@@ -219,37 +220,44 @@ it.append((0x42, gfx_blit))
 
 debug_msg = False
 
+def print_stack():
+    print '->'.join(stack)
+    print ''
+
 def run():
     ip = 0
     while memory[ip] != END:
         # print ip
-        if debug_msg:
-            for e in stack:
-                print e
-            print '---------------'
         op = memory[ip]
         if op == PUSH:
             if debug_msg:
-                print 'push: ' + str(memory[ip + 1])
+                print 'push: ' + hex(memory[ip + 1]) + ' (' + str(memory[ip + 1]) + ')'
             stack.append(memory[ip + 1])
             ip += 1
         elif op == PUSHA:
             if debug_msg:
-                print 'push_addr: ' + str(memory[ip + 1]) + ' ' + str(memory[ip + 2])
+                print 'push_addr: ' + hex((memory[ip + 2] << 8) | memory[ip + 1]) + ' (' + str((memory[ip + 2] << 8) | memory[ip + 1]) + ')'
             stack.append(memory[ip + 1])
             stack.append(memory[ip + 2])
             ip += 2
         elif op == LOAD:
             addr = (stack.pop() << 8) | stack.pop()
             stack.append(memory[addr])
+            if debug_msg:
+                print 'load ' + str(memory[addr]) + ' from ' + hex(addr) + '(' + str(addr) + ')'
         elif op == STORE:
             addr = (stack.pop() << 8) | stack.pop()
-            memory[addr] = stack.pop()
+            value = stack.pop()
+            memory[addr] = value
+            if debug_msg:
+                print 'store ' + hex(value) + ' (' + str(value) + ') -> ' + hex(addr) + '(' + str(addr) + ')'
         elif op == INC:
             stack[-1] = min(0xFF, stack[-1] + 1)
         elif op == INCM:
             addr = (stack[-1] << 8) | stack[-2]
-            memory[addr] = min(0xFF, memory[addr])
+            memory[addr] = min(0xFF, memory[addr] + 1)
+            if debug_msg:
+                print 'incm at ' + hex(addr) + ' to ' + str(memory[addr])
         elif op == DEC:
             opr = stack.pop()
             opr -= 1
@@ -278,9 +286,18 @@ def run():
             else:
                 ip += 2
         elif op == IFCMPLT:
-            if stack.pop() < stack.pop():
-                ip = ((memory[ip + 1] << 8) | memory[ip + 2])
+            v1 = stack.pop()
+            v2 = stack.pop()
+            if v2 < v1:
+                if debug_msg:
+                    print 'ifcmplt ' + str(v2) + ' < ' + str(v1)
+                ip = max((memory[ip + 2] << 8) | memory[ip + 1], 0)
+                ip -= 1
+                if debug_msg:
+                    print '\tjump to ' + hex(ip) + ' (' + str(ip) + ')'
             else:
+                if debug_msg:
+                    print 'ifcmplt ' + str(v2) + ' >= ' + str(v1)
                 ip += 2
 
         elif op == CP:
@@ -328,7 +345,7 @@ def run():
             destx = stack.pop()
             desty = stack.pop()
             if debug_msg:
-                print 'copy_incv: ' + str(src) + ' -> ' + str((destx, desty))
+                print 'copy_incv: ' + hex(src) + '(' + hex(pal[memory[src]]) + ')' + ' -> ' + str((destx, desty))
                 # print 'copy_inc: ' + str(memory[src]) + ' -> ' + str(memory[dest])
             tia_buffer[destx][desty] = pal[memory[src]]
             src  += 1
@@ -352,14 +369,20 @@ def run():
             if cb:
                 cb()
             ip += 1
+        elif op == NOP:
+            if debug_msg:
+                print 'nop'
+
         ip += 1
         if debug_msg:
+            print '\nStack:'
+            for e in reversed(stack):
+                print hex(e) + ' == ' + str(e)
+            print '---------------'
             raw_input()
 
-    if debug_msg:
-        for e in stack:
-            print e
-        print ''
+    # if debug_msg:
+    #     print_stack()
 
 
 
