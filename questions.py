@@ -14,18 +14,26 @@ def square_wave(freq, amplitude, duration):
 	sample_length = int((44100 * duration) / wavelength)
 	print sample_length
 	half_wv = wavelength/2
-	return numpy.array((([amplitude] * half_wv) + ([-amplitude] * half_wv)) * sample_length, dtype=numpy.int8)
+	snd_buf = numpy.array((([amplitude] * half_wv) + ([-amplitude] * half_wv)) * sample_length, dtype=numpy.int8)
+	return pygame.sndarray.make_sound(snd_buf)
 
 # a = numpy.zeros(44100, numpy.int8)
 # amplitude = 120
 # square_cycle = ([amplitude] * 30) + ([-amplitude] * 30)
 # for i in range(44100/len(square_cycle)):
 # 	a[i*len(square_cycle):(i+1)*len(square_cycle)] = square_cycle
+noise    = pygame.Sound(numpy.zeros(44100 * 2, numpy.int8))
+pulse_a  = pygame.Sound(numpy.zeros(44100 * 2, numpy.int8))
+pulse_b  = pygame.Sound(numpy.zeros(44100 * 2, numpy.int8))
+triangle = pygame.Sound(numpy.zeros(44100 * 2, numpy.int8))
+
 a = square_wave(441, 100, 0.05)
 a = numpy.concatenate((a, square_wave(261.63, 100, 0.05)))
 sound = pygame.sndarray.make_sound(a)
 # sound.play(loops=-1)
 sound.play()
+
+sound2 = pygame.mixer.Sound()
 
 while True:
 	for event in pygame.event.get():
