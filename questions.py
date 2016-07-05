@@ -2,6 +2,7 @@ import numpy
 import pygame
 import pygame.locals
 import sys
+import time
 
 pygame.mixer.pre_init(size=-8, channels=1)
 pygame.init()
@@ -12,28 +13,38 @@ _display_surf = pygame.display.set_mode((100, 100))
 def square_wave(freq, amplitude, duration):
 	wavelength = int(round(44100/freq))
 	sample_length = int((44100 * duration) / wavelength)
-	print sample_length
 	half_wv = wavelength/2
 	snd_buf = numpy.array((([amplitude] * half_wv) + ([-amplitude] * half_wv)) * sample_length, dtype=numpy.int8)
-	return pygame.sndarray.make_sound(snd_buf)
+	# print (wavelength, sample_length, len(snd_buf))
+	return snd_buf
 
-# a = numpy.zeros(44100, numpy.int8)
-# amplitude = 120
-# square_cycle = ([amplitude] * 30) + ([-amplitude] * 30)
-# for i in range(44100/len(square_cycle)):
-# 	a[i*len(square_cycle):(i+1)*len(square_cycle)] = square_cycle
-noise    = pygame.Sound(numpy.zeros(44100 * 2, numpy.int8))
-pulse_a  = pygame.Sound(numpy.zeros(44100 * 2, numpy.int8))
-pulse_b  = pygame.Sound(numpy.zeros(44100 * 2, numpy.int8))
-triangle = pygame.Sound(numpy.zeros(44100 * 2, numpy.int8))
 
-a = square_wave(441, 100, 0.05)
-a = numpy.concatenate((a, square_wave(261.63, 100, 0.05)))
+def triangle_wave(freq, amplitude, duration):
+	wavelength = int(round(44100/freq))
+	inc = (amplitude * 4.0)/wavelength
+	acc = -amplitude
+	sample_length = int((44100 * duration) / wavelength)
+	raw_buf = []
+	for i in range(wavelength/2):
+		raw_buf.append(int(acc))
+		acc += inc
+	return numpy.array((raw_buf + raw_buf[::-1]) * sample_length, dtype=numpy.int8)
+
+pulse_a  = pygame.mixer.Channel(0)
+pulse_b  = pygame.mixer.Channel(1)
+triangle = pygame.mixer.Channel(2)
+noise    = pygame.mixer.Channel(3)
+
+
+a = triangle_wave(6000, 10, 0.5)
+for i in range(10, 10000, 5):
+	a = numpy.concatenate((a, triangle_wave(i, 100, 0.05)))
 sound = pygame.sndarray.make_sound(a)
-# sound.play(loops=-1)
-sound.play()
-
-sound2 = pygame.mixer.Sound()
+pulse_a.play(sound)
+# time.sleep(2)
+# t = triangle_wave(523.25, 10, 1)
+# tsound = pygame.sndarray.make_sound(t)
+# triangle.play(tsound)
 
 while True:
 	for event in pygame.event.get():
