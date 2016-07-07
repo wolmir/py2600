@@ -50,8 +50,11 @@ noise    = pygame.mixer.Channel(3)
 a = square_wave(441, 10, 0.5)
 a2 = square_wave(441, 10, 0.5, 0.25)
 a3 = square_wave(441, 10, 0.5, 0.125)
-n = noise_wave(1, 1, 0.01)
-for i in range(2, 300):
+n = noise_wave(1, 100, 0.01)
+for i in range(2, 50):
+	b = min(i, 25)
+	n = numpy.concatenate((n, noise_wave(b, 100, 0.01)))
+for i in range(2, 50, 4):
 	n = numpy.concatenate((n, noise_wave(i, 100, 0.01)))
 sound = pygame.sndarray.make_sound(a)
 sound2 = pygame.sndarray.make_sound(a2)
