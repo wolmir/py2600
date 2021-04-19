@@ -240,7 +240,7 @@ B = pygame.locals.K_x
 debug_msg = False
 
 def debug_cmd():
-    cmd = raw_input('dbg:> ')
+    cmd = input('dbg:> ')
     if cmd == 'n' or cmd == '':
         return True
     if cmd == 'setm':
