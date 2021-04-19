@@ -1,9 +1,9 @@
 import sys
 import time
 import pygame
+import pygame.locals
 
-# pygame.init()
-from pygame.locals import *
+pygame.init()
 
 # Organisation
 
@@ -16,6 +16,7 @@ LOAD    = 0x01
 STORE   = 0x02
 INC     = 0x03
 INCM    = 0x15
+INCMIP  = 0x17
 DEC     = 0x04
 ADD     = 0x05
 SUB     = 0x06
@@ -24,6 +25,7 @@ DIV     = 0X08
 PUSH    = 0x09
 IFCMPEQ = 0x0A
 IFCMPLT = 0x14
+JMP     = 0x16
 CP      = 0x0B
 CPIP    = 0x0C
 CPINC   = 0x0D
@@ -186,7 +188,7 @@ pal.append(0xe8cc7c)
 pal.append(0xfce08c)
 
 
-pygame.init()
+# pygame.init()
 
 screen = None
 tia = None
@@ -218,7 +220,36 @@ it.append((0x42, gfx_blit))
 
 # ///////////////////////////// End of Graphics Display Config /////////////////////////
 
+
+
+
+# //////////////////////////////////// Input Config ///////////////////////////////////
+
+INPUT_ADDR = 0x1FFF
+
+UP    = pygame.locals.K_UP
+DOWN  = pygame.locals.K_DOWN
+LEFT  = pygame.locals.K_LEFT
+RIGHT = pygame.locals.K_RIGHT
+
+A = pygame.locals.K_z
+B = pygame.locals.K_x
+
+# //////////////////////////////////// End of Input Config ///////////////////////////
+
 debug_msg = False
+
+def debug_cmd():
+    cmd = raw_input('dbg:> ')
+    if cmd == 'n' or cmd == '':
+        return True
+    if cmd == 'setm':
+        addr = int(raw_input('addr:> '), 16)
+        value = int(raw_input('value:> '), 16)
+        memory[addr] = value
+        return True
+    print 'qutting.. Press any key to continue...'
+    return False
 
 def print_stack():
     print('->'.join(stack))
@@ -243,9 +274,9 @@ def run():
             ip += 2
         elif op == LOAD:
             addr = (stack.pop() << 8) | stack.pop()
-            stack.append(memory[addr])
             if debug_msg:
                 print('load ' + str(memory[addr]) + ' from ' + hex(addr) + '(' + str(addr) + ')')
+            stack.append(memory[addr])
         elif op == STORE:
             addr = (stack.pop() << 8) | stack.pop()
             value = stack.pop()
@@ -254,8 +285,13 @@ def run():
                 print('store ' + hex(value) + ' (' + str(value) + ') -> ' + hex(addr) + '(' + str(addr) + ')')
         elif op == INC:
             stack[-1] = min(0xFF, stack[-1] + 1)
-        elif op == INCM:
+        elif op == INCMIP:
             addr = (stack[-1] << 8) | stack[-2]
+            memory[addr] = min(0xFF, memory[addr] + 1)
+            if debug_msg:
+                print('incm at ' + hex(addr) + ' to ' + str(memory[addr]))
+        elif op == INCM:
+            addr = (stack.pop() << 8) | stack.pop()
             memory[addr] = min(0xFF, memory[addr] + 1)
             if debug_msg:
                 print('incm at ' + hex(addr) + ' to ' + str(memory[addr]))
@@ -283,7 +319,10 @@ def run():
 
         elif op == IFCMPEQ:
             if stack.pop() == stack.pop():
-                ip = ((memory[ip + 1] << 8) | memory[ip + 2])
+                ip = max((memory[ip + 2] << 8) | memory[ip + 1], 0)
+                ip -= 1
+                if debug_msg:
+                    print('ifcmpeq: true, jmp to ' + hex(ip) + '(' + str(ip) + ')')
             else:
                 ip += 2
         elif op == IFCMPLT:
@@ -300,6 +339,12 @@ def run():
                 if debug_msg:
                     print('ifcmplt ' + str(v2) + ' >= ' + str(v1))
                 ip += 2
+        elif op == JMP:
+            addr = (memory[ip + 2] << 8) | memory[ip + 1]
+            ip = max(addr, 0)
+            ip -= 1
+            if debug_msg:
+                    print('jump to ' + hex(ip) + ' (' + str(ip) + ')')
 
         elif op == CP:
             src = (stack.pop() << 8) | stack.pop()
@@ -375,12 +420,46 @@ def run():
                 print('nop')
 
         ip += 1
+
+        for event in pygame.event.get():
+            if event.type == pygame.locals.QUIT:
+                return
+
+            if event.type == pygame.locals.KEYDOWN:
+                if event.key == UP:
+                    memory[INPUT_ADDR] = memory[INPUT_ADDR] | 0x01
+                elif event.key == DOWN:
+                    memory[INPUT_ADDR] = memory[INPUT_ADDR] | 0x02
+                elif event.key == LEFT:
+                    memory[INPUT_ADDR] = memory[INPUT_ADDR] | 0x04
+                elif event.key == RIGHT:
+                    memory[INPUT_ADDR] = memory[INPUT_ADDR] | 0x08
+                elif event.key == A:
+                    memory[INPUT_ADDR] = memory[INPUT_ADDR] | 0x10
+                elif event.key == B:
+                    memory[INPUT_ADDR] = memory[INPUT_ADDR] | 0x20
+
+            elif event.type == pygame.locals.KEYUP:
+                if event.key == UP:
+                    memory[INPUT_ADDR] = memory[INPUT_ADDR] & 0xfe
+                elif event.key == DOWN:
+                    memory[INPUT_ADDR] = memory[INPUT_ADDR] & 0xfd
+                elif event.key == LEFT:
+                    memory[INPUT_ADDR] = memory[INPUT_ADDR] & 0xfb
+                elif event.key == RIGHT:
+                    memory[INPUT_ADDR] = memory[INPUT_ADDR] & 0xf7
+                elif event.key == A:
+                    memory[INPUT_ADDR] = memory[INPUT_ADDR] & 0xef
+                elif event.key == B:
+                    memory[INPUT_ADDR] = memory[INPUT_ADDR] & 0xdf
+
         if debug_msg:
             print('\nStack:')
             for e in reversed(stack):
                 print(hex(e) + ' == ' + str(e))
             print('---------------')
-            input()
+            if not debug_cmd():
+                return
 
     print("done")
     # if debug_msg:

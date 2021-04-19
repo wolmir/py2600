@@ -37,7 +37,7 @@ STORE                  ;effectively store the index
 label line_loop
 CPINCV
 PUSHA 0x1FFE
-INCM
+INCMIP
 
 [line_loop]
 LOAD

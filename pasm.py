@@ -50,10 +50,8 @@ class LabelState(State):
         self.label_data = []
 
     def update(self, symbol):
-        if symbol != END_OF_BLOCK:
-            if symbol != '\n':
-                self.label_data.append(symbol)
-        else:
+        self.label_data.append(symbol)
+        if symbol == END_OF_BLOCK:
             self.fsm.labeled[self.label_name] = self.label_data
             self.fsm.change_state(InitialState(self.fsm))
 
@@ -76,9 +74,10 @@ class PushState(State):
         State.__init__(self, fsm)
 
     def update(self, symbol):
-        self.fsm.machine_code.append(py2600.PUSH)
-        self.fsm.machine_code.append(int(symbol, 16))
-        self.fsm.change_state(InitialState(self.fsm))
+        if symbol != '':
+            self.fsm.machine_code.append(py2600.PUSH)
+            self.fsm.machine_code.append(int(symbol, 16))
+            self.fsm.change_state(InitialState(self.fsm))
 
 
 class CommentState(State):
@@ -95,14 +94,15 @@ class PushaState(State):
         State.__init__(self, fsm)
 
     def update(self, symbol):
-        self.fsm.machine_code.append(py2600.PUSHA)
-        try:
-            value = int(symbol, 16)
-            self.fsm.machine_code.append(value & 0x00FF)
-            self.fsm.machine_code.append((value & 0xFF00) >> 8)
-        except ValueError:
-            addr = self.fsm.mark_for_resolution(symbol[1:-1])
-        self.fsm.change_state(InitialState(self.fsm))
+        if symbol != '':
+            self.fsm.machine_code.append(py2600.PUSHA)
+            try:
+                value = int(symbol, 16)
+                self.fsm.machine_code.append(value & 0x00FF)
+                self.fsm.machine_code.append((value & 0xFF00) >> 8)
+            except ValueError:
+                addr = self.fsm.mark_for_resolution(symbol[1:-1])
+            self.fsm.change_state(InitialState(self.fsm))
 
 
 class InterruptState(State):
@@ -110,9 +110,10 @@ class InterruptState(State):
         State.__init__(self, fsm)
 
     def update(self, symbol):
-        self.fsm.machine_code.append(py2600.INT)
-        self.fsm.machine_code.append(int(symbol, 16))
-        self.fsm.change_state(InitialState(self.fsm))
+        if symbol != '':
+            self.fsm.machine_code.append(py2600.INT)
+            self.fsm.machine_code.append(int(symbol, 16))
+            self.fsm.change_state(InitialState(self.fsm))
 
 
 class DataState(State):
@@ -137,15 +138,20 @@ class BranchState(State):
         State.__init__(self, fsm)
         if branch_type == 'lt':
             self.fsm.machine_code.append(py2600.IFCMPLT)
+        elif branch_type == 'eq':
+            self.fsm.machine_code.append(py2600.IFCMPEQ)
+        elif branch_type == 'jmp':
+            self.fsm.machine_code.append(py2600.JMP)
 
     def update(self, symbol):
-        try:
-            value = int(symbol, 16)
-            self.fsm.machine_code.append(value & 0x00FF)
-            self.fsm.machine_code.append((value & 0xFF00) >> 8)
-        except ValueError:
-            addr = self.fsm.mark_for_resolution(symbol[1:-1])
-        self.fsm.change_state(InitialState(self.fsm))
+        if symbol != '':
+            try:
+                value = int(symbol, 16)
+                self.fsm.machine_code.append(value & 0x00FF)
+                self.fsm.machine_code.append((value & 0xFF00) >> 8)
+            except ValueError:
+                addr = self.fsm.mark_for_resolution(symbol[1:-1])
+            self.fsm.change_state(InitialState(self.fsm))
 
 
 class InitialState(State):
@@ -177,8 +183,14 @@ class InitialState(State):
             self.fsm.machine_code.append(py2600.LOAD)
         elif symbol == 'INCM':
             self.fsm.machine_code.append(py2600.INCM)
+        elif symbol == 'INCMIP':
+            self.fsm.machine_code.append(py2600.INCMIP)
         elif symbol == 'IFCMPLT':
             self.fsm.change_state(BranchState('lt', self.fsm))
+        elif symbol == 'IFCMPEQ':
+            self.fsm.change_state(BranchState('eq', self.fsm))
+        elif symbol == 'JMP':
+            self.fsm.change_state(BranchState('jmp', self.fsm))
         elif symbol.startswith('['):
             self.fsm.resolve(symbol[1:-1])
         elif symbol.startswith(';'):
@@ -234,8 +246,11 @@ class PasmFSM:
 
     def resolve_for_position(self, symbol):
         if symbol in self.resolved_symbols.keys():
-            self.machine_code.append(self.resolved_symbols[symbol][0])
-            self.machine_code.append(self.resolved_symbols[symbol][1])
+            addr_a = self.resolved_symbols[symbol][0]
+            addr_b = self.resolved_symbols[symbol][1]
+            print '\tAlready resolved to ' + str((addr_b << 8) | addr_a)
+            self.machine_code.append(addr_a)
+            self.machine_code.append(addr_b)
             return True
         self.machine_code.append(0x00)
         self.machine_code.append(0x00)
