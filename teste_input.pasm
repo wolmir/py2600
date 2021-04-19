@@ -2,7 +2,7 @@ label game_loop
 PUSHA   0x1FFF         ; Gamepad addr
 LOAD
 PUSH    0x08            ; Right arrow
-IFCMPEQ (update_line)
+IFCMPEQ (update_line_right)
 
 label draw_line
 PUSHA   (liney)
@@ -14,7 +14,7 @@ CPV
 INT     0x42
 JMP     (game_loop)
 
-label update_line
+label update_line_right
 PUSHA (linex)
 INCM
 JMP (draw_line)
@@ -30,7 +30,7 @@ label line_color
 
 [game_loop]
 [draw_line]
-[update_line]
+[update_line_right]
 [linex]
 [liney]
 [line_color]

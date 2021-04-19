@@ -1,0 +1,25 @@
+{
+    "name": "pasm",
+    "displayName": "Py2600 Assembly Language",
+    "description": "Support for Py2600 assembly language.",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.55.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "pasm",
+            "aliases": ["Py2600 Assembly", "pasm"],
+            "extensions": [".pasm"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "pasm",
+            "scopeName": "source.pasm",
+            "path": "./syntaxes/atari_vm_assembly.tmLanguage"
+        }]
+    }
+}

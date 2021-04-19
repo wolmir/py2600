@@ -7,7 +7,7 @@ PROGRAM_START = 0x00
 class InvalidConstantError(Exception):
     def __init__(self, constant):
         Exception.__init__(self)
-        print 'Invalid constant: ' + constant
+        print('Invalid constant: ' + constant)
 
 class Tape:
     def __init__(self, initial_sequence):
@@ -18,18 +18,18 @@ class Tape:
     def __iter__(self):
         return self
 
-    def next(self):
+    def __next__(self):
         if self.tape_head == len(self.sequence):
             raise StopIteration
         next_symbol = self.sequence[self.tape_head]
         if next_symbol == '\n':
-            print '\\n'
+            print('\\n')
         elif next_symbol == ' ':
-            print 'SPACE'
+            print('SPACE')
         elif next_symbol == '':
-            print 'EMPTY'
+            print('EMPTY')
         else:
-            print next_symbol
+            print(next_symbol)
         self.tape_head += 1
         return next_symbol
 
@@ -128,7 +128,7 @@ class DataState(State):
                     data = int(symbol, 16)
                     self.fsm.machine_code.append(data)
             except ValueError:
-                print 'Invalid constant: ' + str(symbol)
+                print('Invalid constant: ' + str(symbol))
                 sys.exit()
         else:
             self.fsm.change_state(InitialState(self.fsm))
@@ -221,26 +221,26 @@ class PasmFSM:
         self.tape = Tape(PasmFSM.sanitize(src))
 
     def change_state(self, state):
-        print 'Change to: ' + state.__class__.__name__
+        print('Change to: ' + state.__class__.__name__)
         self.currentState = state
 
     def getResults(self):
         return self.machine_code
 
     def mark_for_resolution(self, symbol):
-        print 'Marking for resolution: ' + symbol
+        print('Marking for resolution: ' + symbol)
         if not self.resolve_for_position(symbol):
             self.marked_symbols.mark((symbol, len(self.machine_code) - 2))
 
     def resolve(self, ref_name):
-        print "Resolving references to: " + ref_name
+        print("Resolving references to: " + ref_name)
         ref_values = self.labeled[ref_name]
         self.tape.insert(ref_values)
         symbol_addr = len(self.machine_code)
         self.resolved_symbols[ref_name] = (symbol_addr & 0x00FF, (symbol_addr & 0xFF00) >> 8)
         for addr in self.marked_symbols.get_refs_to(ref_name):
-            print '\tAt addr: ' + str(addr)
-            print '\t\tresolved to: ' + str(symbol_addr & 0x00FF) + ' ' + str((symbol_addr & 0xFF00) >> 8) + ' or ' + str(symbol_addr)
+            print('\tAt addr: ' + str(addr))
+            print('\t\tresolved to: ' + str(symbol_addr & 0x00FF) + ' ' + str((symbol_addr & 0xFF00) >> 8) + ' or ' + str(symbol_addr))
             self.machine_code[addr] = symbol_addr & 0x00FF
             self.machine_code[addr + 1] = (symbol_addr & 0xFF00) >> 8
 
@@ -248,7 +248,7 @@ class PasmFSM:
         if symbol in self.resolved_symbols.keys():
             addr_a = self.resolved_symbols[symbol][0]
             addr_b = self.resolved_symbols[symbol][1]
-            print '\tAlready resolved to ' + str((addr_b << 8) | addr_a)
+            print('\tAlready resolved to ' + str((addr_b << 8) | addr_a))
             self.machine_code.append(addr_a)
             self.machine_code.append(addr_b)
             return True
@@ -295,7 +295,7 @@ class Assembler:
 
 if __name__ == '__main__':
     if len(sys.argv) < 0:
-        print 'Usage: pasm file_name'
+        print('Usage: pasm file_name')
 
     assembler = Assembler(sys.argv[1])
     assembler.assemble()

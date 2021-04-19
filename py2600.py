@@ -248,7 +248,7 @@ def debug_cmd():
         value = int(raw_input('value:> '), 16)
         memory[addr] = value
         return True
-    print 'qutting.. Press any key to continue...'
+    print('quitting.. Press any key to continue...')
     return False
 
 def print_stack():
