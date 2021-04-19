@@ -2,7 +2,7 @@ import sys
 import time
 import pygame
 
-pygame.init()
+# pygame.init()
 from pygame.locals import *
 
 # Organisation
@@ -197,7 +197,7 @@ def configure_gfx():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption('Py2600')
     tia = pygame.Surface((TIA_WIDTH, TIA_HEIGHT)).convert()
-    print tia.get_locked()
+    print(tia.get_locked())
 
 def blit_array():
     _buffer = pygame.surfarray.array2d(tia)
@@ -221,22 +221,23 @@ it.append((0x42, gfx_blit))
 debug_msg = False
 
 def print_stack():
-    print '->'.join(stack)
-    print ''
+    print('->'.join(stack))
+    print('')
 
 def run():
     ip = 0
+    print("running")
     while memory[ip] != END:
         # print ip
         op = memory[ip]
         if op == PUSH:
             if debug_msg:
-                print 'push: ' + hex(memory[ip + 1]) + ' (' + str(memory[ip + 1]) + ')'
+                print('push: ' + hex(memory[ip + 1]) + ' (' + str(memory[ip + 1]) + ')')
             stack.append(memory[ip + 1])
             ip += 1
         elif op == PUSHA:
             if debug_msg:
-                print 'push_addr: ' + hex((memory[ip + 2] << 8) | memory[ip + 1]) + ' (' + str((memory[ip + 2] << 8) | memory[ip + 1]) + ')'
+                print('push_addr: ' + hex((memory[ip + 2] << 8) | memory[ip + 1]) + ' (' + str((memory[ip + 2] << 8) | memory[ip + 1]) + ')')
             stack.append(memory[ip + 1])
             stack.append(memory[ip + 2])
             ip += 2
@@ -244,20 +245,20 @@ def run():
             addr = (stack.pop() << 8) | stack.pop()
             stack.append(memory[addr])
             if debug_msg:
-                print 'load ' + str(memory[addr]) + ' from ' + hex(addr) + '(' + str(addr) + ')'
+                print('load ' + str(memory[addr]) + ' from ' + hex(addr) + '(' + str(addr) + ')')
         elif op == STORE:
             addr = (stack.pop() << 8) | stack.pop()
             value = stack.pop()
             memory[addr] = value
             if debug_msg:
-                print 'store ' + hex(value) + ' (' + str(value) + ') -> ' + hex(addr) + '(' + str(addr) + ')'
+                print('store ' + hex(value) + ' (' + str(value) + ') -> ' + hex(addr) + '(' + str(addr) + ')')
         elif op == INC:
             stack[-1] = min(0xFF, stack[-1] + 1)
         elif op == INCM:
             addr = (stack[-1] << 8) | stack[-2]
             memory[addr] = min(0xFF, memory[addr] + 1)
             if debug_msg:
-                print 'incm at ' + hex(addr) + ' to ' + str(memory[addr])
+                print('incm at ' + hex(addr) + ' to ' + str(memory[addr]))
         elif op == DEC:
             opr = stack.pop()
             opr -= 1
@@ -290,23 +291,23 @@ def run():
             v2 = stack.pop()
             if v2 < v1:
                 if debug_msg:
-                    print 'ifcmplt ' + str(v2) + ' < ' + str(v1)
+                    print('ifcmplt ' + str(v2) + ' < ' + str(v1))
                 ip = max((memory[ip + 2] << 8) | memory[ip + 1], 0)
                 ip -= 1
                 if debug_msg:
-                    print '\tjump to ' + hex(ip) + ' (' + str(ip) + ')'
+                    print('\tjump to ' + hex(ip) + ' (' + str(ip) + ')')
             else:
                 if debug_msg:
-                    print 'ifcmplt ' + str(v2) + ' >= ' + str(v1)
+                    print('ifcmplt ' + str(v2) + ' >= ' + str(v1))
                 ip += 2
 
         elif op == CP:
             src = (stack.pop() << 8) | stack.pop()
             dest = (stack.pop() << 8) | stack.pop()
             if debug_msg:
-                print 'copy: ' + str(src) + ' -> ' + str(dest)
-                print 'copy: ' + str(memory[src]) + ' -> ' + str(memory[dest])
-                print memory[src - 1]
+                print('copy: ' + str(src) + ' -> ' + str(dest))
+                print('copy: ' + str(memory[src]) + ' -> ' + str(memory[dest]))
+                print(memory[src - 1])
             memory[dest] = memory[src]
         elif op == CPIP:
             src = (stack[-1] << 8) | stack[-2]
@@ -316,8 +317,8 @@ def run():
             src  = (stack.pop() << 8) | stack.pop()
             dest = (stack.pop() << 8) | stack.pop()
             if debug_msg:
-                print 'copy_inc: ' + str(src) + ' -> ' + str(dest)
-                print 'copy_inc: ' + str(memory[src]) + ' -> ' + str(memory[dest])
+                print('copy_inc: ' + str(src) + ' -> ' + str(dest))
+                print('copy_inc: ' + str(memory[src]) + ' -> ' + str(memory[dest]))
             memory[dest] = memory[src]
             src  += 1
             dest += 1
@@ -331,9 +332,9 @@ def run():
             destx = stack.pop()
             desty = stack.pop()
             if debug_msg:
-                print 'copyv: ' + str(src) + ' -> ' + str((destx, desty))
+                print('copyv: ' + str(src) + ' -> ' + str((destx, desty)))
                 # print 'copyv: ' + str(memory[src]) + ' -> ' + str(memory[dest])
-                print memory[src - 1]
+                print(memory[src - 1])
             tia_buffer[destx][desty] = pal[memory[src]]
         elif op == CPIPV:
             src = (stack[-1] << 8) | stack[-2]
@@ -345,7 +346,7 @@ def run():
             destx = stack.pop()
             desty = stack.pop()
             if debug_msg:
-                print 'copy_incv: ' + hex(src) + '(' + hex(pal[memory[src]]) + ')' + ' -> ' + str((destx, desty))
+                print('copy_incv: ' + hex(src) + '(' + hex(pal[memory[src]]) + ')' + ' -> ' + str((destx, desty)))
                 # print 'copy_inc: ' + str(memory[src]) + ' -> ' + str(memory[dest])
             tia_buffer[destx][desty] = pal[memory[src]]
             src  += 1
@@ -361,7 +362,7 @@ def run():
         elif op == INT:
             ic = memory[ip + 1]
             if debug_msg:
-                print 'interrupt: ' + str(ic)
+                print('interrupt: ' + str(ic))
             cb = None
             for ih in it:
                 if ih[0] == ic:
@@ -371,16 +372,17 @@ def run():
             ip += 1
         elif op == NOP:
             if debug_msg:
-                print 'nop'
+                print('nop')
 
         ip += 1
         if debug_msg:
-            print '\nStack:'
+            print('\nStack:')
             for e in reversed(stack):
-                print hex(e) + ' == ' + str(e)
-            print '---------------'
-            raw_input()
+                print(hex(e) + ' == ' + str(e))
+            print('---------------')
+            input()
 
+    print("done")
     # if debug_msg:
     #     print_stack()
 
@@ -388,7 +390,7 @@ def run():
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print "Usage: py2600 rom_file"
+        print("Usage: py2600 rom_file")
         sys.exit()
 
     with open(sys.argv[1], 'rb') as rom_file:
@@ -396,5 +398,5 @@ if __name__ == '__main__':
         memory[0:len(program)] = program
         configure_gfx()
         run()
-        raw_input()
+        input()
 
